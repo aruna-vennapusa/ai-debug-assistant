@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-const port = "8080";
+const port = 8080;
 
 app.use(
   cors({
@@ -19,7 +19,18 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  res.send({ ok: true });
+  res.json({ ok: true });
+});
+
+app.post("/api/analyze", (req, res) => {
+  const { errorMessage } = req.body;
+
+  if (!errorMessage) {
+    return res.status(400).json({
+      error: "Error Message is not valid",
+    });
+  }
+  res.json({ meaning: "", likelyCauses: [], fixSteps: [], suggestedCode: "" });
 });
 
 app.listen(port, () => {
