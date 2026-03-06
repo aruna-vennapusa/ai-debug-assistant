@@ -20,9 +20,9 @@ function App() {
         setErrorState(err.message);
       } else {
         setErrorState("Something went wrong");
-      } // save error message
+      }
     } finally {
-      setLoading(false); // stop waiting
+      setLoading(false);
     }
   };
 
