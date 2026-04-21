@@ -57,6 +57,27 @@ function AnalyzeError() {
       >
         {loading ? "Analyzing..." : "Analyze"}
       </button>
+      {result && (
+        <div>
+          <h3>Analysis Result</h3>
+          <h4>Meaning</h4>
+          <p>{result.meaning}</p>
+          <h4>Likely Causes</h4>
+          <ul>
+            {result.likelyCauses.map((step, index) => (
+              <li key={index}>{step}</li>
+            ))}
+          </ul>
+          <h4>Fix Steps</h4>
+          <ol>
+            {result.fixSteps.map((step, index) => (
+              <li key={index}>{step}</li>
+            ))}
+          </ol>
+          <h4>Suggested Code</h4>
+          {result?.suggestedCode && <pre>{result.suggestedCode}</pre>}
+        </div>
+      )}
       {error && <p style={{ color: "red" }}>{error}</p>}
     </>
   );
