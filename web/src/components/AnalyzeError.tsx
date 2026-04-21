@@ -8,10 +8,12 @@ function AnalyzeError() {
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState<boolean>(false);
 
   const handleAnalyze = async () => {
     setError(null);
     setResult(null);
+    setCopied(false);
     setLoading(true);
 
     const payload: AnalyzeRequest = {
@@ -36,6 +38,18 @@ function AnalyzeError() {
     }
   };
 
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
   return (
     <>
       <h2>Analyze Error</h2>
@@ -57,6 +71,7 @@ function AnalyzeError() {
       >
         {loading ? "Analyzing..." : "Analyze"}
       </button>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       {result && (
         <div>
           <h3>Analysis Result</h3>
@@ -64,8 +79,8 @@ function AnalyzeError() {
           <p>{result.meaning}</p>
           <h4>Likely Causes</h4>
           <ul>
-            {result.likelyCauses.map((step, index) => (
-              <li key={index}>{step}</li>
+            {result.likelyCauses.map((cause, index) => (
+              <li key={index}>{cause}</li>
             ))}
           </ul>
           <h4>Fix Steps</h4>
@@ -75,10 +90,21 @@ function AnalyzeError() {
             ))}
           </ol>
           <h4>Suggested Code</h4>
-          {result?.suggestedCode && <pre>{result.suggestedCode}</pre>}
+          {result?.suggestedCode && (
+            <div>
+              <button
+                disabled={copied}
+                onClick={() => {
+                  handleCopy(result.suggestedCode!);
+                }}
+              >
+                {!copied ? "Copy Code..." : "Copied!"}
+              </button>
+              <pre>{result.suggestedCode}</pre>
+            </div>
+          )}
         </div>
       )}
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </>
   );
 }
