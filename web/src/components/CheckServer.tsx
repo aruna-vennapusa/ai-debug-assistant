@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import { checkServer } from "../services/apiClient";
 import type { HealthResponse } from "../types/api";
 
 function CheckServer() {
@@ -11,8 +11,8 @@ function CheckServer() {
       setError(null);
       setResult(null);
       setLoading(true);
-      const response = await axios.get<HealthResponse>("/health");
-      setResult(response.data);
+      const data = await checkServer();
+      setResult(data);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
