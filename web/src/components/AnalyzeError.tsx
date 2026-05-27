@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { AnalyzeResponse, AnalyzeRequest } from "../types/api";
 import { analyzeError } from "../services/apiClient";
+import "../styles/AnalyzeError.css";
 
 function AnalyzeError() {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -48,61 +49,69 @@ function AnalyzeError() {
   };
 
   return (
-    <>
-      <h2>Analyze Error</h2>
-      <label>Error message</label>
-      <textarea
-        placeholder="TypeError: Cannot read properties of undefined (reading 'map')"
-        value={errorMessage}
-        onChange={(e) => setErrorMessage(e.target.value)}
-      />
-      <label>Code snippet</label>
-      <textarea
-        placeholder="Paste related code here..."
-        value={codeSnippet}
-        onChange={(e) => setCodeSnippet(e.target.value)}
-      />
-      <button
-        disabled={loading || errorMessage.trim() === ""}
-        onClick={handleAnalyze}
-      >
-        {loading ? "Analyzing..." : "Analyze"}
-      </button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {result && (
-        <div>
-          <h3>Analysis Result</h3>
-          <h4>Meaning</h4>
-          <p>{result.meaning}</p>
-          <h4>Likely Causes</h4>
-          <ul>
-            {result.likelyCauses.map((cause, index) => (
-              <li key={index}>{cause}</li>
-            ))}
-          </ul>
-          <h4>Fix Steps</h4>
-          <ol>
-            {result.fixSteps.map((step, index) => (
-              <li key={index}>{step}</li>
-            ))}
-          </ol>
-          <h4>Suggested Code</h4>
-          {result?.suggestedCode && (
-            <div>
-              <button
-                disabled={copied}
-                onClick={() => {
-                  handleCopy(result.suggestedCode!);
-                }}
-              >
-                {!copied ? "Copy Code..." : "Copied!"}
-              </button>
-              <pre>{result.suggestedCode}</pre>
-            </div>
-          )}
+    <section className="analyze-container">
+      <div className="analyze-card">
+        <h2>Analyze Error</h2>
+        <div className="form-group">
+          <label>Error message</label>
+          <textarea
+            placeholder="TypeError: Cannot read properties of undefined (reading 'map')"
+            value={errorMessage}
+            onChange={(e) => setErrorMessage(e.target.value)}
+          />
         </div>
-      )}
-    </>
+        <div className="form-group">
+          <label>Code snippet</label>
+          <textarea
+            placeholder="Paste related code here..."
+            value={codeSnippet}
+            onChange={(e) => setCodeSnippet(e.target.value)}
+          />
+        </div>
+        <button
+          disabled={loading || errorMessage.trim() === ""}
+          onClick={handleAnalyze}
+        >
+          {loading ? "Analyzing..." : "Analyze"}
+        </button>
+        {error && <p className="error-message">{error}</p>}
+        {result && (
+          <div className="result-card">
+            <h3>Analysis Result</h3>
+            <h4>Meaning</h4>
+            <p>{result.meaning}</p>
+            <h4>Likely Causes</h4>
+            <ul>
+              {result.likelyCauses.map((cause, index) => (
+                <li key={index}>{cause}</li>
+              ))}
+            </ul>
+            <h4>Fix Steps</h4>
+            <ol>
+              {result.fixSteps.map((step, index) => (
+                <li key={index}>{step}</li>
+              ))}
+            </ol>
+            <div className="code-section">
+              <h4>Suggested Code</h4>
+              {result?.suggestedCode && (
+                <div>
+                  <button
+                    disabled={copied}
+                    onClick={() => {
+                      handleCopy(result.suggestedCode!);
+                    }}
+                  >
+                    {!copied ? "Copy Code" : "Copied!"}
+                  </button>
+                  <pre className="code-block">{result.suggestedCode}</pre>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
