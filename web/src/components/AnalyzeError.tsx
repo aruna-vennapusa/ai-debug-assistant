@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { AnalyzeResponse, AnalyzeRequest } from "../types/api";
-import axios from "axios";
+import { analyzeError } from "../services/apiClient";
 
 function AnalyzeError() {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -22,11 +22,8 @@ function AnalyzeError() {
     };
 
     try {
-      const response = await axios.post<AnalyzeResponse>(
-        "/api/analyze",
-        payload,
-      );
-      setResult(response.data);
+      const data = await analyzeError(payload);
+      setResult(data);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
