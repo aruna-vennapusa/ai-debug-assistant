@@ -13,6 +13,6 @@ export async function analyzeError(
 }
 
 export async function checkServer(): Promise<HealthResponse> {
-  const response = await await axios.get<HealthResponse>("/health");
+  const response = await axios.get<HealthResponse>("/health");
   return response.data;
 }
