@@ -1,8 +1,26 @@
 import express from "express";
 import cors from "cors";
+import OpenAI from "openai";
+import "dotenv/config";
 
 const app = express();
 const port = 8080;
+
+const mockAnalyzeResponse = {
+  meaning:
+    "This error happens when you try to call the map method on a value that is undefined.",
+  likelyCauses: [
+    "The variable is undefined.",
+    "API data has not loaded yet.",
+    "State was not initialized properly.",
+  ],
+  fixSteps: [
+    "Initialize state with an empty array.",
+    "Check data before rendering.",
+    "Use optional chaining where appropriate.",
+  ],
+  suggestedCode: "const [items, setItems] = useState([]);",
+};
 
 app.use(
   cors({
@@ -14,6 +32,10 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 app.get("/", (req, res) => {
   res.send("Hello");
 });
@@ -22,7 +44,7 @@ app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/analyze", (req, res) => {
+app.post("/api/analyze", async (req, res) => {
   const { errorMessage, codeSnippet } = req.body ?? {};
 
   if (typeof errorMessage !== "string" || errorMessage.trim() === "") {
@@ -30,22 +52,52 @@ app.post("/api/analyze", (req, res) => {
       error: "ErrorMessage must be a non-empty string",
     });
   }
-  res.json({
-    meaning:
-      "This error happens when you try to call the 'map' method on a value that is undefined. In JavaScript, only arrays have the 'map' method, so if the variable is undefined or null, the operation will fail.",
-    likelyCauses: [
-      "The variable you are calling map() on has not been initialized yet.",
-      "Data from an API request has not loaded before rendering the component.",
-      "The state variable is initially undefined instead of an empty array.",
-    ],
-    fixSteps: [
-      "Ensure the variable you are calling map() on is an array before rendering.",
-      "Initialize state variables with an empty array instead of undefined.",
-      "Add conditional rendering to avoid calling map() before the data is available.",
-    ],
-    suggestedCode:
-      "const [items, setItems] = useState([]);\n\nreturn (\n  <div>\n    {items.map(item => (\n      <p key={item.id}>{item.name}</p>\n    ))}\n  </div>\n);",
-  });
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an AI debugging assistant. Return only valid JSON. Do not include markdown or explanation outside JSON.",
+        },
+        {
+          role: "user",
+          content: `
+Analyze this developer error.
+
+Error message:
+${errorMessage}
+
+Code snippet:
+${codeSnippet || "No code snippet provided"}
+
+Return JSON exactly in this shape:
+{
+  "meaning": "simple explanation",
+  "likelyCauses": ["cause 1", "cause 2"],
+  "fixSteps": ["step 1", "step 2"],
+  "suggestedCode": "optional improved code snippet"
+}
+        `,
+        },
+      ],
+    });
+
+    const aiText = completion.choices[0]?.message?.content;
+
+    if (!aiText) {
+      return res.json(mockAnalyzeResponse);
+    }
+
+    const parsedResponse = JSON.parse(aiText);
+
+    return res.json(parsedResponse);
+  } catch (err) {
+    console.error("AI analyze failed:", err);
+
+    return res.json(mockAnalyzeResponse);
+  }
 });
 
 app.listen(port, () => {
