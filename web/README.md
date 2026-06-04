@@ -99,11 +99,11 @@ If the AI provider is unavailable or returns an error, the application falls bac
 
 ### Main Application
 
-Add screenshot here after deployment.
+![Main Application](screenshots/main-app.png)
 
 ### Analysis Result
 
-Add screenshot here after deployment.
+![Analysis Result](screenshots/analysis-result.png)
 
 ---
 
