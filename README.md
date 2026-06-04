@@ -186,3 +186,5 @@ This project provided hands-on experience with:
 ```
 
 ```
+
+Note: The backend includes OpenAI SDK integration and uses a fallback response when the AI provider is unavailable or quota is not configured.
